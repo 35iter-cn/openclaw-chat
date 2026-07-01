@@ -59,31 +59,19 @@ DEEPSEEK_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 其他变量已有默认值，可以不修改。
 
-### 3. 克隆上游仓库（首次运行需要）
-
-```bash
-bash scripts/setup.sh
-```
-
-这一步会把 OpenClaw 和 LibreChat 的源码克隆到本地，用于 Docker 构建。
-之后更新上游代码只需重新运行此脚本即可。
-
-> ⏱ 根据网络状况约 1-2 分钟。
-
-### 4. 启动服务
+### 3. 启动服务
 
 ```bash
 docker compose up -d
 ```
 
-> ⏱ 首次启动需要拉取 Docker 基础镜像和构建，约 **10-25 分钟**，取决于网络。
-> 后续启动只需几秒钟。
+> ⏱ 首次启动需下载 Docker 镜像，约 **2-5 分钟**，取决于网络。
 
-### 5. 注册账号
+### 4. 注册账号
 
 打开浏览器访问 **http://localhost:3080/register**，注册第一个用户（自动成为管理员）。
 
-### 6. 选择模型开始对话
+### 5. 选择模型开始对话
 
 1. 登录后，在对话界面顶部找到模型下拉菜单
 2. 选择 **"小九"**（如果看不到，刷新页面或重新登录）
@@ -137,8 +125,6 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:3080/register
 │       └── SOUL.md              # 小九的身份设定
 ├── images/
 │   └── jointown.png             # 九州通 Logo
-└── scripts/
-    └── setup.sh                 # 首次运行：克隆上游仓库
 ```
 
 ## 故障排查
@@ -191,9 +177,6 @@ docker compose restart openclaw-gateway  # 只重启某个服务
 ### 更新到最新版本
 
 ```bash
-# 更新上游代码
-bash scripts/setup.sh
-
 # 拉取最新 Docker 镜像并重启
 docker compose pull
 docker compose up -d
