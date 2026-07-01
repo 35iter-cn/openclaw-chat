@@ -1,0 +1,42 @@
+# =============================================================================
+# LibreChat 配置 — 连接 OpenClaw Gateway 作为 AI 后端
+# =============================================================================
+# LibreChat 将用户消息转发给 OpenClaw（通过 OpenAI 兼容 API），
+# OpenClaw 负责所有智能体逻辑（代码读取、文档检索、Tool Calling）。
+# LibreChat 仅负责多用户登录与会话管理。
+# =============================================================================
+
+version: 1.3.13
+
+cache: true
+
+# ─── 界面配置 ──────────────────────────────────────────────────────────────
+interface:
+  customWelcome: "欢迎使用九州通健康科技智能体平台"
+  modelSelect: true
+  parameters: true
+  presets: true
+  bookmarks: true
+  multiConvo: false
+  agents:
+    use: false
+    create: false
+    share: false
+    public: false
+  fileCitations: false
+
+# ─── 自定义端点：OpenClaw Gateway ────────────────────────────────────────
+endpoints:
+  custom:
+    - name: "小九"
+      apiKey: "${OPENCLAW_GATEWAY_TOKEN}"
+      baseURL: "http://openclaw-gateway:18789/v1"
+      models:
+        default:
+          - "openclaw"
+        fetch: false
+      titleConvo: true
+      titleModel: "openclaw"
+      modelDisplayLabel: "小九"
+      # 九州通健康科技 logo
+      iconURL: "/images/jointown.png"

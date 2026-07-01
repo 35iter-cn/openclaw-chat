@@ -1,0 +1,43 @@
+{
+  "agents": {
+    "defaults": {
+      "model": "deepseek-v4/deepseek-chat"
+    }
+  },
+  "models": {
+    "providers": {
+      "deepseek-v4": {
+        "baseUrl": "https://api.deepseek.com/v1",
+        "apiKey": "${DEEPSEEK_API_KEY}",
+        "models": [
+          {
+            "id": "deepseek-chat",
+            "name": "DeepSeek V4 Flash"
+          },
+          {
+            "id": "deepseek-reasoner",
+            "name": "DeepSeek R1"
+          }
+        ]
+      }
+    }
+  },
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "token": "${OPENCLAW_GATEWAY_TOKEN}"
+    },
+    "http": {
+      "endpoints": {
+        "chatCompletions": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "env": {
+    "vars": {
+      "CLAW_CONTROL_URL": "http://clawcontrol-backend:3001"
+    }
+  }
+}

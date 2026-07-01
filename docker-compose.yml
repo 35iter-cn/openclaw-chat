@@ -1,0 +1,129 @@
+# =============================================================================
+# docker-compose.yml — 九州通健康科技 AI 智能体平台
+# =============================================================================
+# 包含：LibreChat（多用户 Web UI）+ OpenClaw Gateway（AI 引擎）
+# =============================================================================
+
+services:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # OpenClaw Gateway — AI 智能体引擎
+  # ═══════════════════════════════════════════════════════════════════════════
+  openclaw-gateway:
+    image: openclaw/openclaw:latest
+    container_name: openclaw-gateway
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${OPENCLAW_GATEWAY_PORT:-18789}:18789"
+      - "127.0.0.1:${OPENCLAW_BRIDGE_PORT:-18790}:18790"
+    volumes:
+      - ./openclaw/openclaw.json:/home/node/.openclaw/openclaw.json:ro
+      - openclaw_config:/home/node/.openclaw
+      - ./openclaw/workspace/SOUL.md:/home/node/.openclaw/workspace/SOUL.md:ro
+      - openclaw_workspace:/home/node/.openclaw/workspace
+    environment:
+      HOME: /home/node
+      OPENCLAW_HOME: /home/node
+      TERM: xterm-256color
+      OPENCLAW_STATE_DIR: /home/node/.openclaw
+      OPENCLAW_CONFIG_PATH: /home/node/.openclaw/openclaw.json
+      OPENCLAW_CONFIG_DIR: /home/node/.openclaw
+      OPENCLAW_WORKSPACE_DIR: /home/node/.openclaw/workspace
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN:-}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      TZ: ${TZ:-UTC}
+    cap_drop:
+      - NET_RAW
+      - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    init: true
+    networks:
+      - claw-network
+    command:
+      - node
+      - dist/index.js
+      - gateway
+      - --bind
+      - "lan"
+      - --port
+      - "18789"
+    healthcheck:
+      test:
+        ["CMD", "node", "-e",
+         "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # LibreChat — 多用户 Web 聊天界面
+  # ═══════════════════════════════════════════════════════════════════════════
+  librechat-mongodb:
+    image: mongo:8.0.20
+    container_name: librechat-mongodb
+    restart: unless-stopped
+    volumes:
+      - librechat_mongodb:/data/db
+    command: mongod --noauth
+    networks:
+      - claw-network
+
+  librechat-meilisearch:
+    image: getmeili/meilisearch:v1.35.1
+    container_name: librechat-meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_HOST: http://librechat-meilisearch:7700
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-DrhYf7zENyR6AlUCKmnz0eYASOQdl6zxH7s7MKFSfFCt}
+    volumes:
+      - librechat_meili:/meili_data
+    networks:
+      - claw-network
+
+  librechat-api:
+    image: registry.librechat.ai/danny-avila/librechat-dev-api:latest
+    container_name: librechat-api
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${LIBRECHAT_PORT:-3080}:${LIBRECHAT_PORT:-3080}"
+    depends_on:
+      - librechat-mongodb
+      - librechat-meilisearch
+      - openclaw-gateway
+    environment:
+      HOST: 0.0.0.0
+      PORT: ${LIBRECHAT_PORT:-3080}
+      MONGO_URI: mongodb://librechat-mongodb:27017/LibreChat
+      MEILI_HOST: http://librechat-meilisearch:7700
+      CONFIG_PATH: /app/librechat.yaml
+      RAG_API_URL: ""
+    env_file:
+      - .env
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml:ro
+      - ./images:/app/client/public/images
+      - librechat_uploads:/app/uploads
+      - librechat_logs:/app/logs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - claw-network
+
+# ─── 持久化卷 ──────────────────────────────────────────────────────────────
+volumes:
+  openclaw_config:
+  openclaw_workspace:
+  librechat_mongodb:
+  librechat_meili:
+  librechat_uploads:
+  librechat_logs:
+
+# ─── 自定义网络 ────────────────────────────────────────────────────────────
+networks:
+  claw-network:
+    driver: bridge
+    name: jzth-ai-network
