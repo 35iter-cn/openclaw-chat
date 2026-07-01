@@ -4,6 +4,8 @@
 
 **代号：小九** 🤖
 
+<img width="2367" height="1470" alt="6dc6a1157a43fc5d75c89bc401a46daa" src="https://github.com/user-attachments/assets/778b2180-71e8-4a55-80e8-ba11cd1c3e2c" />
+
 ## 架构
 
 ```
