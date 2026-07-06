@@ -12,6 +12,7 @@
 ┌─ 用户浏览器 ─────────────────────────────────┐
 │                                               │
 │  http://localhost:3080 ← LibreChat            │
+│  http://localhost:3090 ← Open WebUI           │
 │    ┌────────────────────────────────────┐     │
 │    │  用户注册 / 登录 / 会话隔离        │     │
 │    │  选择模型 → "小九" 开始对话       │     │
@@ -101,6 +102,10 @@ curl -s http://localhost:18789/healthz
 curl -s -o /dev/null -w "%{http_code}" http://localhost:3080/
 # 应返回: 200
 
+# 测试 Open WebUI 页面
+curl -s -o /dev/null -w "%{http_code}" http://localhost:3090/
+# 应返回: 200
+
 # 测试 LibreChat 注册页面
 curl -s -o /dev/null -w "%{http_code}" http://localhost:3080/register
 # 应返回: 200
@@ -111,6 +116,7 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:3080/register
 | 地址 | 服务 | 说明 |
 |------|------|------|
 | `http://localhost:3080` | LibreChat | 多用户 Web 对话界面 |
+| `http://localhost:3090` | Open WebUI | 并行的多用户 Web 对话界面 |
 | `http://localhost:18789` | OpenClaw Gateway | AI 引擎 + 管理后台 |
 
 ## 目录结构
@@ -188,10 +194,10 @@ docker compose up -d
 
 | 组件 | 技术 |
 |------|------|
-| Web 界面 | LibreChat（Node.js / React / Express） |
+| Web 界面 | LibreChat / Open WebUI（Node.js / React） |
 | AI 引擎 | OpenClaw Gateway（Node.js / TypeScript） |
 | 大模型 | DeepSeek V4 Flash（通过 OpenAI 兼容 API） |
-| 用户存储 | MongoDB |
+| 用户存储 | MongoDB（LibreChat） / SQLite（Open WebUI） |
 | 搜索索引 | MeiliSearch |
 | 容器编排 | Docker Compose |
 
