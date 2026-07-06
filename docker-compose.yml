@@ -62,7 +62,7 @@ services:
   # Open WebUI — 并行的多用户 Web 聊天界面
   # ═══════════════════════════════════════════════════════════════════════════
   open-webui:
-    image: ghcr.io/open-webui/open-webui:main
+    image: openwebui/open-webui:latest-slim
     container_name: open-webui
     restart: unless-stopped
     ports:
