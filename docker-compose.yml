@@ -59,6 +59,29 @@ services:
       start_period: 30s
 
   # ═══════════════════════════════════════════════════════════════════════════
+  # Open WebUI — 并行的多用户 Web 聊天界面
+  # ═══════════════════════════════════════════════════════════════════════════
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${OPENWEBUI_PORT:-3090}:8080"
+    depends_on:
+      - openclaw-gateway
+    environment:
+      - ENABLE_OPENAI_API=${ENABLE_OPENAI_API:-true}
+      - OPENAI_API_BASE_URL=${OPENAI_API_BASE_URL:-http://openclaw-gateway:18789/v1}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - TZ=${TZ:-UTC}
+    volumes:
+      - openwebui_data:/app/backend/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - claw-network
+
+  # ═══════════════════════════════════════════════════════════════════════════
   # LibreChat — 多用户 Web 聊天界面
   # ═══════════════════════════════════════════════════════════════════════════
   librechat-mongodb:
@@ -121,6 +144,7 @@ volumes:
   librechat_meili:
   librechat_uploads:
   librechat_logs:
+  openwebui_data:
 
 # ─── 自定义网络 ────────────────────────────────────────────────────────────
 networks:
